@@ -13,6 +13,8 @@ Clone repo:
         git clone https://github.com/TomoeFox/django-chat.git
         
 Python dependencies:
+        
+    pip install asgi_redis
 
     pip install django
     
