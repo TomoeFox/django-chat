@@ -14,6 +14,8 @@ Clone repo:
         
 Python dependencies:
         
+    pip install channels_redis
+    
     pip install asgi_redis
 
     pip install django
