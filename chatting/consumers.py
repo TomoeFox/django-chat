@@ -2,6 +2,7 @@ from channels.generic.websocket import WebsocketConsumer
 import json
 from .models import Message, Room
 from asgiref.sync import async_to_sync
+from django.utils import timezone
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -107,7 +108,11 @@ class ChatListConsumer(WebsocketConsumer):
         room = Room.objects.get(room_name=room)
         room_name = room.room_name if not room.is_private else [i.username for i in room.chatuser_set.all() if i !=
                                                                 self.user.username][0]
-        time = room.message_set.last().date.strftime("%b. %e, %Y, |%I:%M %p").split("|")
+        if room.message_set.last():
+            time = room.message_set.last().date
+        else:
+            time = timezone.now()
+        time = time.strftime("%b. %e, %Y, |%I:%M %p").split("|")
         time = time[0] + time[1] if time[1][0] != "0" else time[0] + time[1][1:]
         time = time.replace("AM", "a.m.") .replace("AM", "a.m.") if "AM" in time else time.replace("PM", "p.m.")
         for user in room.chatuser_set.all():
