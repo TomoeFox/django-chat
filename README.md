@@ -43,6 +43,6 @@ Shut down server using CTRL+C and run
 
         python manage.py migrate, than run server again.
 
-After server is started go to 127.0.0.1:8000 and login as Test user, credentials for it: 
-    
-    Login: Test, Password: Test
+After server is started go to 127.0.0.1:8000 and register new user.
+For chatting use global chat (as defaul) or private chat. For private chat click on user nickname, than will open private chat with this user.
+
