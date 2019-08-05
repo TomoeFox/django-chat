@@ -20,7 +20,12 @@ class Room(models.Model):
 
     @staticmethod
     def get_default_chat():
-        return Room.objects.get(room_name="global")
+        try:
+            default_chat = Room.objects.get(room_name="global")
+        except Room.DoesNotExist:
+            default_chat = Room(room_name="global", is_private=False)
+            default_chat.save()
+        return default_chat
 
 
 class ChatUser(User):
