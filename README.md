@@ -5,7 +5,8 @@ Install python:
         
 For Windows:
         
-        https://www.microsoft.com/en-us/download/details.aspx?id=44266
+        https://visualstudio.microsoft.com/ru/downloads/ install python C++ compiler
+        pip install --upgrade setuptools
         
 Clone repo:
         
