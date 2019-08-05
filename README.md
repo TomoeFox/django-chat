@@ -1,8 +1,14 @@
 # django-chat
 Clone repo
+Install:
+
+        https://www.microsoft.com/en-us/download/details.aspx?id=44266
+        
 Python dependencies:
 
     pip install django
+    
+    pip install pathlib
     
     pip install django-bootstrap3
   
