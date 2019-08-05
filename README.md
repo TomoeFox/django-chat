@@ -15,4 +15,6 @@ Then go to django-chat main folder and start django server using command:
     
     python manage.py runserver
 
-After server is started go to 127.0.0.1:8000 and login as Test user, credentials for it: Login: Test, Password: Test
+After server is started go to 127.0.0.1:8000 and login as Test user, credentials for it: 
+    
+    Login: Test, Password: Test
