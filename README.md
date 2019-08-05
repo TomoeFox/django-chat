@@ -35,7 +35,9 @@ Download and install Redis:
 Then go to django-chat main folder and start django server using command: 
     
     python manage.py runserver
-Shut down server using CTRL+C and run python manage.py migrate, than run server again.
+Shut down server using CTRL+C and run 
+
+        python manage.py migrate, than run server again.
 
 After server is started go to 127.0.0.1:8000 and login as Test user, credentials for it: 
     
