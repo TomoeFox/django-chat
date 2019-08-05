@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Chat{% endblock %}
+{% block content %}
+<div class="panel panel-default" id="chat-list">
+    <div class="panel-heading"> <h3> Your chat list </h3></div>
+    <div class="panel-body" id="all-chats">
+        {% for chat in chat_list %}
+        {% if chat.message_set.last %}
+            <div class="alert alert-info" role="alert" id="{{ chat.pk }}">
+            {% if chat.is_private %}
+                <p class="glyphicon glyphicon-eye-close " data-toggle="tooltip" data-placement="top" title="Private chat"></p>
+                {% for user in chat.chatuser_set.all %}
+                    {% if user.username != request.user.username %}
+                        <a href="{% url 'private' user.username %}" class="alert-link" id="room-name">
+                            Chat: {{user.username}}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-placement="top" title="Public chat"></p>
+                <a href= {{chat.room_name}} class="alert-link"> Chat: {{chat.room_name}} </a>
+            {% endif %}
+            <p> Last message: {{chat.message_set.last.date}} </p>
+            <p> {{ chat.message_set.last.user}}:  {{ chat.message_set.last.message}} </p>
+        </div>
+        {% elif chat == chat.get_default_chat %}
+            <div class="alert alert-info" role="alert" id="{{ chat.pk }}" >
+                <a href= {{chat.room_name}} class="alert-link"> Chat: {{chat.room_name}}</a>
+        </div>
+
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script type="text/javascript" src='{% static "js/reconnecting-websocket.min.js" %}'></script>
+<script>
+    var chatUserUpdate = new ReconnectingWebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/');
+    chatUserUpdate.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var roomBlock = $("#"+data["room"]+" #room-name");
+        var roomName = roomBlock.text();
+        roomName = roomName.slice(roomName.indexOf(": ")+1);
+        var pm_url = roomBlock.attr("href");
+        $("#"+data["room"]).remove();
+        if (data["is_private"] === true) {
+            $('<div class="alert alert-info" role="alert" id="'+data["room"]+'"><p class="glyphicon glyphicon-eye-close " data-toggle="tooltip" data-placement="top" title="Private chat"></p><a href="'+pm_url+'" class="alert-link" id="room-name"> Chat: '+roomName+'</a><p> Last message: '+data["last_change"]+' </p> <p> '+data["last_message"]["user"]+':  '+data["last_message"]["message"]+'</p>').prependTo($("#all-chats"))
+         }
+        else {
+            $('<div class="alert alert-info" role="alert" id="'+data["room"]+'"><p class="glyphicon glyphicon-eye-close " data-toggle="tooltip" data-placement="top" title="Private chat"></p><a href="'+data["room_name"]+'" class="alert-link" id="room-name"> Chat: '+data["room_name"]+'</a><p> Last message: '+data["last_change"]+' </p> <p> '+data["last_message"]["user"]+':  '+data["last_message"]["message"]+'</p>').prependTo($("#all-chats"))
+        }
+    };
+</script>
+{% endblock %}
+

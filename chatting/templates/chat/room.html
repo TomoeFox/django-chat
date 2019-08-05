@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Chat Room{% endblock %}
+{% block content %}
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<div class="row">
+    <div class="col-md-5">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-comment"></span> {{ chat_name }}
+            </div>
+            <div class="panel-body" id="all_messages">
+                <ul class="chat">
+                    {% for message in chat_messages %}
+                    {% if message.user == user %}
+                    <li class="right clearfix">
+                                    <span class="chat-img pull-right">
+                                        <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar"
+                                             class="img-circle"/>
+                                    </span>
+                        <div class="chat-body clearfix">
+                            <div class="header">
+                                <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>{{message.date|date:"H:i"}}
+                                </small>
+                                <strong class="pull-right primary-font">
+                                    {{ message.user }}
+                                </strong>
+                                {% if message.can_edit %}
+                                <small class="pull-right" id="edit-message">
+                                    <button class="btn btn-link glyphicon glyphicon-wrench btn-xs" data-toggle="modal"
+                                            data-target="#edit-message-modal" data-message="{{message.message}}"
+                                            data-pk={{message.pk}} id={{message.pk}}></button>
+                                </small>
+                                {% endif %}
+                            </div>
+                            <p data-pk={{message.pk}}>
+                                {{ message.message|safe }}
+                            </p>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="left clearfix"><span class="chat-img pull-left">
+                                    <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar"
+                                         class="img-circle"/>
+                                </span>
+                        <div class="chat-body clearfix">
+                            <div class="header">
+                                <strong class="primary-font">
+                                    <a href="{% url 'private' message.user %}" style="color: rgb(0,0,0)">{{ message.user }}</a></strong>
+                                <small class="pull-right text-muted">
+                                    <span class="glyphicon glyphicon-time"></span>{{message.date|date:"H:i"}}
+                                </small>
+                            </div>
+                            <p data-pk={{message.pk}}>
+                                {{ message.message|safe }}
+                            </p>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% empty %}
+
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="panel-footer">
+                <div class="input-group">
+                    <input id="btn-input" type="text" class="form-control input-sm"
+                           placeholder="Type your message here..."/>
+                    <span class="input-group-btn">
+                                <button class="btn btn-warning btn-sm" id="btn-chat">
+                                    Send</button>
+                            </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="edit-message-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Edit message</h4>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <input type="text" class="form-control form-control-sm" id="edited-message">
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="btn-edit-modal">Send</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript" src='{% static "js/reconnecting-websocket.min.js" %}'></script>
+<script>
+
+    $('#all_messages').scrollTop($('#all_messages')[0].scrollHeight);
+    var roomName = {{ room_name_json }};
+    var message_id = 0;
+    var chatSocket = new ReconnectingWebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/' + roomName + '/');
+    var chatUserUpdate = new ReconnectingWebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/');
+
+    chatSocket.onmessage = function (e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        var now_time = data['now_time'];
+        var receive_user = data['user'];
+        var user = "{{user}}";
+        {% url 'private' "receive_user" as private_url %}
+        var pm_url  = "{{ private_url }}".replace("receive_user", receive_user);
+        var message_id = data['id'];
+        var event = data['event'];
+        if (event === "chat_message"){
+        if (receive_user === user) {
+            $('<li class="right clearfix"><span class="chat-img pull-right"><img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle"/></span><div class="chat-body clearfix"><div class="header"><small class=" text-muted"><span class="glyphicon glyphicon-time"></span>'+now_time+'</small><strong class="pull-right primary-font">'+user+'</strong><small class="pull-right "><button class="btn btn-link glyphicon glyphicon-wrench btn-xs" data-toggle="modal" data-target="#edit-message-modal" data-message="' +message+'" data-pk='+message_id+' id="btn-edit"></button></button></small></div><p data-pk='+message_id+'>'+message+'</p></div></li>').appendTo($('.chat'))
+        }
+        else{
+            $('<li class="left clearfix"><span class="chat-img pull-left"><img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle"/></span><div class="chat-body clearfix"><div class="header"><strong class="primary-font"> <a href='+pm_url+' style="color: rgb(0,0,0)">'+ receive_user+ '</a></strong><small class="pull-right text-muted"><span class="glyphicon glyphicon-time"></span>'+now_time+'</small></div><p data-pk='+message_id+'>'+message+'</p></div></li>').appendTo($('.chat'))
+        }
+        $('#all_messages').scrollTop($('#all_messages')[0].scrollHeight);
+        }
+        else if (event === "update_message") {
+            var message_body = $('p[data-pk="'+message_id+'"]');
+            message_body.text(message);
+        }
+        };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#btn-input').focus();
+    document.querySelector('#btn-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#btn-chat').click();} };
+
+
+    function isBlank(str) {
+        return (!str || /^\s*$/.test(str));
+    }
+
+
+    document.querySelector('#btn-chat').onclick = function(e) {
+        var messageInputDom = document.querySelector('#btn-input');
+        var message = messageInputDom.value;
+        if (message  === '' || isBlank(message)) { return 0; }
+        chatSocket.send(JSON.stringify(
+        {
+            'message': message,
+            'event': "chat_message"
+        }
+        ));
+        chatUserUpdate.send(JSON.stringify({
+            'event': 'update_chat',
+            'room': roomName
+        }));
+        messageInputDom.value = '';
+    };
+
+     $('#edit-message-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var message = button.data('message');
+        var modal = $(this);
+        message_id = button.data('pk');
+        modal.find('#edited-message').val(message);
+        });
+
+     document.querySelector('#btn-edit-modal').onclick = function(e) {
+        var messageInputDom = document.querySelector('#edited-message');
+        var message = messageInputDom.value;
+        $('#'+message_id).data("message", message);
+        if (message  === '' || isBlank(message)) { return 0; }
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'event': "update_message",
+            'message_id': message_id
+        }));
+        $('#edit-message-modal').modal('hide');
+        $('#all_messages').scrollTop($('#all_messages')[0].scrollHeight);
+        };
+
+
+     document.querySelector('#btn-edit-modal').focus();
+     document.querySelector('#edited-message').onkeyup = function(e){
+        if (e.keyCode === 13) {  // enter, return
+            $("#btn-edit-modal").click();} };
+
+</script>
+{% endblock %}

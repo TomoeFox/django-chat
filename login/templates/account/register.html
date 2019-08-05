@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load bootstrap3 %}
+{% block title %}Create an account{% endblock %}
+{% block content %}
+    <div class="jumbotron">
+        <h1>Create an account</h1>
+    </div>
+
+    <form action="." method="post" class="form">
+        {% csrf_token %}
+        {% bootstrap_form user_form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">
+                Create my account
+            </button>
+        {% endbuttons %}
+    </form>
+{% endblock %}
