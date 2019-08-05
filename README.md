@@ -9,8 +9,9 @@ Python dependencies:
     pip install asgiref==2.3.0
 
 Download and install Redis:
-  
-    https://redis.io/download
+
+    Linux:
+        https://redis.io/download
     
     Windows:
         https://redislabs.com/ebook/appendix-a/a-3-installing-on-windows/a-3-2-installing-redis-on-window/
