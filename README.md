@@ -1,7 +1,9 @@
 # django-chat
 Clone repo
 Python dependencies:
-  
+
+    pip install django
+    
     pip install django-bootstrap3
   
     pip install -U channels
