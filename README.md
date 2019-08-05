@@ -4,8 +4,10 @@ Install python:
         https://www.python.org/downloads/
         
 For Windows:
+        install python C++ compiler
         
-        https://visualstudio.microsoft.com/ru/downloads/ install python C++ compiler
+        https://visualstudio.microsoft.com/ru/downloads/
+       
         pip install --upgrade setuptools
         
 Clone repo:
