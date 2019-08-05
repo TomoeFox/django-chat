@@ -1,7 +1,7 @@
 # django-chat
 Clone repo
-Install:
-
+For Windows:
+        
         https://www.microsoft.com/en-us/download/details.aspx?id=44266
         
 Python dependencies:
